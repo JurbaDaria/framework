@@ -1,0 +1,21 @@
+ {#templates/task/create.html.twig#}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Создать задачу{% endblock %}
+
+{% block body %}
+    {% if task is defined %}
+        {% set action = 'app_tasks_update' %}
+        {% set title = 'Редактировать задачу' %}
+    {% else %}
+        {% set action = 'app_tasks_create' %}
+        {% set title = 'Создать задачу' %}
+    {% endif %}
+
+    <h1>{{ title }}</h1>
+
+    {{ form(form) }}
+
+    <a href="{{ path('app_tasks_list') }}" class="btn btn-primary">Вернуться к списку задач</a>
+{% endblock %}

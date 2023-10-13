@@ -1,0 +1,40 @@
+ {#templates/task/list.html.twig#}
+{% block body %}
+    <h1>Список задач</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Заголовок</th>
+                <th>Срок выполнения</th>
+                <th>Категория</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+                <tr>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.dueDate|date('d.m.Y') }}</td>
+                    <td>{{ task.category }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if pagination.page > 1 %}
+            <a href="{{ path('app_tasks_list', {'page': pagination.page - 1}) }}">Предыдущая</a>
+        {% endif %}
+
+        {% for page in pagination.pages %}
+            <a href="{{ path('app_tasks_list', {'page': page}) }}">{{ page }}</a>
+        {% endfor %}
+
+        {% if pagination.page < pagination.pages %}
+            <a href="{{ path('app_tasks_list', {'page': pagination.page + 1}) }}">Следующая</a>
+        {% endif %}
+    </div>
+
+    <a href="{{ path('app_tasks_create') }}" class="btn btn-primary">Создать задачу</a>
+{% endblock %}
+
