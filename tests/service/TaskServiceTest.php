@@ -1,5 +1,5 @@
 <?php
-use App\Service\TaskService; // Импортируйте класс
+use App\Service\TaskService; 
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class TaskServiceTest extends KernelTestCase
@@ -9,7 +9,7 @@ class TaskServiceTest extends KernelTestCase
         self::bootKernel();
         $container = self::$kernel->getContainer();
 
-        $taskService = $container->get(TaskService::class); // Используйте полное имя класса
+        $taskService = $container->get(TaskService::class);
 
         $task = $taskService->addTask('Test Task');
 
