@@ -19,3 +19,6 @@
 
     <a href="{{ path('app_tasks_list') }}" class="btn btn-primary">Вернуться к списку задач</a>
 {% endblock %}
+
+{% if is_granted('ROLE_ADMIN') %} <a href="#">Delete</a>
+{% endif %}

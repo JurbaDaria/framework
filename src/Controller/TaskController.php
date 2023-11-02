@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\Task; 
+use App\Form\TaskType; 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,17 +11,17 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Paginator\Paginator;
 use Symfony\Component\Paginator\Adapter\AdapterInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 
-
-
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class TaskController extends AbstractController
 {
     #[Route('/task', name: 'app_task')]
-
-    public function list(PaginatorInterface $paginator, Request $request): Response
+    public function list(PaginatorInterface $paginator, Request $request,EntityManagerInterface $entityManager): Response
     {
-        $tasks = $this->getDoctrine()->getRepository(Task::class)->findAll();
+        $repository = $this->getDoctrine()->getRepository(Task::class);
+        $tasks = $repository->findAll();
 
         $pagination = $paginator->paginate(
             $tasks,
@@ -32,14 +34,9 @@ class TaskController extends AbstractController
         ]);
     }
 
-   
     #[Route('/task/{id}', name: 'app_task_view')]
-    public function view(Request $request, Task $task): Response
+    public function view(Task $task): Response
     {
-        $task = $this->getDoctrine()
-            ->getRepository(Task::class)
-            ->find($id);
-
         if (!$task) {
             throw $this->createNotFoundException('Task not found');
         }
@@ -49,32 +46,28 @@ class TaskController extends AbstractController
         ]);
     }
 
-
-
     #[Route('/task/create', name: 'app_task_create')]
     public function create(Request $request): Response
-{
-    $task = new Task();
-    $form = $this->createForm(TaskType::class, $task);
-
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
+    {
         
+        $task = new Task();
+        $form = $this->createForm(TaskType::class, $task);
 
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($task);
-        $entityManager->flush();
+        $form->handleRequest($request);
 
-        return $this->redirectToRoute('list'); 
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($task);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_task'); // Перенаправляем на список задач
+        }
+
+        return $this->render('tasks/create.html.twig', [
+            'form' => $form->createView(),
+        ]);
+        $this->denyAccessUnlessGranted('ROLE_ADMIN', message: 'Access Denied for You');
     }
-
-    return $this->render('task/create.html.twig', [
-        'form' => $form->createView(),
-    ]);
-
-}
-
 
     #[Route('/task/{id}/update', name: 'app_task_update')]
     public function update(Request $request, Task $task): Response
@@ -83,12 +76,10 @@ class TaskController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $task = $form->getData();
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->flush();
 
-            $em = $this->getDoctrine()->getManager();
-            $em->flush();
-
-            return $this->redirectToRoute('app_tasks_list');
+            return $this->redirectToRoute('app_task'); // Перенаправляем на список задач
         }
 
         return $this->render('tasks/update.html.twig', [
@@ -97,21 +88,13 @@ class TaskController extends AbstractController
         ]);
     }
 
-
     #[Route('/task/{id}/delete', name: 'app_task_delete')]
-    public function delete(Request $request, Task $task): Response
+    public function delete(Task $task): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($task);
         $entityManager->flush();
 
-        return $this->redirectToRoute('app_tasks_list');
+        return $this->redirectToRoute('app_task'); // Перенаправляем на список задач
     }
-
 }
-
-
-
-
-
-
